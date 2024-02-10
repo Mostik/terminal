@@ -16,6 +16,20 @@ pub fn format_string(str: []const u8, args: anytype) ![]u8 {
     return try std.fmt.allocPrint(std.heap.page_allocator, "{s}{s}{s}", .{ return_string, str, Color.Default });
 }
 
+pub const Size = struct {
+    rows: c_ushort,
+    columns: c_ushort,
+    x_pixels: c_ushort,
+    y_pixels: c_ushort,
+};
+
+pub fn size() Size {
+    var window_size: Size = undefined;
+    const status = std.os.linux.ioctl(0, 0x00005413, @intFromPtr(&window_size));
+    _ = status;
+    return window_size;
+}
+
 test "colors" {
     const text = "Hello, world!";
 
