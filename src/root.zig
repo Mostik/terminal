@@ -1,20 +1,6 @@
 const std = @import("std");
 const page_allocator = std.heap.page_allocator;
-pub const Color = @import("./color.zig");
-
-pub fn format_string(str: []const u8, args: anytype) ![]u8 {
-    var return_string: []u8 = std.mem.zeroes([]u8);
-
-    inline for (std.meta.fields(@TypeOf(args))) |f| {
-        return_string = try std.fmt.allocPrint(
-            std.heap.page_allocator,
-            "{s}{s}",
-            .{ return_string, @as(f.type, @field(args, f.name)) },
-        );
-    }
-
-    return try std.fmt.allocPrint(std.heap.page_allocator, "{s}{s}{s}", .{ return_string, str, Color.Default });
-}
+pub usingnamespace @import("color.zig");
 
 pub const Size = struct {
     rows: c_ushort,
@@ -30,39 +16,24 @@ pub fn size() Size {
     return window_size;
 }
 
-test "colors" {
-    const text = "Hello, world!";
-
+pub fn clear() !void {
     const stdout = std.io.getStdOut().writer();
+    _ = try stdout.write("\x1B[2J");
+}
 
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgBlack})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgBlack})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.Default})});
+pub fn cursorPos(row: u8, col: u8) !void {
+    const stdout = std.io.getStdOut().writer();
+    _ = try stdout.print("\x1B[{d};{d}H", .{ row, col });
+}
 
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgRed})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgRed})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.Bold})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgGreen})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgGreen})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.Faint})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgYellow})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgYellow})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.Underline})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgBlue})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgBlue})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.Blink})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgPurple})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgPurple})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgCyan})});
-    try stdout.print("\t{s}", .{try format_string(text, .{Color.bgCyan})});
-
-    try stdout.print("\n{s}", .{try format_string(text, .{Color.fgWhite})});
-    try stdout.print("\t{s}", .{try format_string(text, .{ Color.bgWhite, Color.fgBlack })});
-
-    try stdout.print("\n", .{});
+pub fn getch() !u8 {
+    var ch: u8 = undefined;
+    var oldt: std.os.system.termios = undefined;
+    _ = std.os.linux.tcgetattr(std.os.STDIN_FILENO, &oldt);
+    var newt = oldt;
+    newt.lflag &= ~@as(c_uint, std.os.linux.ICANON | std.os.linux.ECHO);
+    _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, newt);
+    ch = try std.io.getStdIn().reader().readByte();
+    _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, oldt);
+    return ch;
 }
