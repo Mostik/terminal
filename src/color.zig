@@ -62,7 +62,7 @@ pub fn Color(t: ?Type) type {
                 return std.fmt.comptimePrint("\x1b[4{d}m", .{@intFromEnum(col)});
             }
         }
-        pub inline fn default() []const u8 {
+        pub inline fn reset() []const u8 {
             return "\x1b[0m";
         }
         pub inline fn bold() []const u8 {
@@ -81,7 +81,7 @@ test "some" {
     std.debug.print("\n{s} default bit: 4          \n", .{Color(.fg).bit(4)});
     std.debug.print("{s}{s} bold byte: 82          \n", .{ Color(.fg).byte(82), Color(null).bold() });
     std.debug.print("{s}{s} faint rgb: 255, 0, 255 \n", .{ Color(.fg).rgb(255, 0, 255), Color(null).faint() });
-    std.debug.print("{s}{s} underline hex: 0x22ffde   {s}  \n", .{ Color(.fg).hex(0x22ffde), Color(null).underline(), Color(null).default() });
+    std.debug.print("{s}{s} underline hex: 0x22ffde   {s}  \n", .{ Color(.fg).hex(0x22ffde), Color(null).underline(), Color(null).reset() });
     std.debug.print("{s} enm: .yellow      \n", .{Color(.fg).enm(.yellow)});
 
     inline for (1..255) |i| {
@@ -89,7 +89,7 @@ test "some" {
             Color(.bg).byte(@as(u8, @intCast(i))),
             Color(.fg).byte(@as(u8, @intCast(255 - i))),
             i,
-            Color(.bg).default(),
+            Color(.bg).reset(),
         });
         if (i % 9 == 0) {
             std.debug.print("\n", .{});
