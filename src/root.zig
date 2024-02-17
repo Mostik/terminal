@@ -31,7 +31,8 @@ pub fn getch() !u8 {
     var oldt: std.os.system.termios = undefined;
     _ = std.os.linux.tcgetattr(std.os.STDIN_FILENO, &oldt);
     var newt = oldt;
-    newt.lflag &= ~@as(c_uint, std.os.linux.ICANON | std.os.linux.ECHO);
+    newt.lflag.ICANON = false;
+    newt.lflag.ECHO = false;
     _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, newt);
     ch = try std.io.getStdIn().reader().readByte();
     _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, oldt);
