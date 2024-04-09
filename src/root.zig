@@ -28,13 +28,13 @@ pub fn cursorPos(row: u8, col: u8) !void {
 
 pub fn getch() !u8 {
     var ch: u8 = undefined;
-    var oldt: std.os.system.termios = undefined;
-    _ = std.os.linux.tcgetattr(std.os.STDIN_FILENO, &oldt);
+    var oldt: std.os.linux.termios = undefined;
+    _ = std.os.linux.tcgetattr(std.os.linux.STDIN_FILENO, &oldt);
     var newt = oldt;
     newt.lflag.ICANON = false;
     newt.lflag.ECHO = false;
-    _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, newt);
+    _ = std.os.linux.tcsetattr(std.os.linux.STDIN_FILENO, std.os.linux.TCSA.NOW, &newt);
     ch = try std.io.getStdIn().reader().readByte();
-    _ = try std.os.tcsetattr(std.os.STDIN_FILENO, std.os.linux.TCSA.NOW, oldt);
+    _ = std.os.linux.tcsetattr(std.os.linux.STDIN_FILENO, std.os.linux.TCSA.NOW, &oldt);
     return ch;
 }
