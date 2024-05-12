@@ -29,7 +29,7 @@ const Color = @import("terminal").Color;
 pub fn main() !void {
     const mystring = std.fmt.comptimePrint("{s} My text {s}", .{
         Color(null).underline(),
-        Color(null).default(),
+        Color(null).reset(),
     });
     std.debug.print("{s}\n", .{mystring});
 
