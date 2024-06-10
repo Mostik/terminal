@@ -3,7 +3,7 @@
 
 ## Install
 ```
-zig fetch --save https://github.com/Mostik/terminal/archive/v0.0.1.tar.gz
+zig fetch --save https://github.com/Mostik/terminal/archive/v0.0.2.tar.gz
 ```
 ```zig
 //build.zig
