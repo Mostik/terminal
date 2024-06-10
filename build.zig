@@ -29,7 +29,7 @@ pub fn build(b: *std.Build) void {
     // running `zig build`).
     // b.installArtifact(lib);
 
-    _ = b.addModule("terminal", .{ .root_source_file = std.Build.LazyPath{ .path = "src/root.zig" } });
+    _ = b.addModule("terminal", .{ .root_source_file = b.path("src/root.zig") });
 
     // const exe = b.addExecutable(.{
     //     .name = "terminal",
